@@ -13,3 +13,6 @@ CMakeUserPresets.json
 
 # pytorch
 __pycache__
+*.log
+*.pk
+*.pt

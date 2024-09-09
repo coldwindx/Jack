@@ -1,15 +1,17 @@
 import math
 import os
 import sys
+from typing import Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))  
+sys.path.append(os.getcwd())  
 
-from network import MaskedMeanPooling
+from .network import MaskedMeanPooling
 
-def scaled_dot_product(q, k, v, mask=None):
+@torch.jit.export
+def scaled_dot_product(q, k, v, mask: Optional [torch.Tensor]=None):
     '''
         Q: [batch_size, n_heads, len_q, d_k]
         K: [batch_size, n_heads, len_k, d_k]
@@ -38,7 +40,7 @@ class MultiheadAttention(nn.Module):
         self.qkv_proj = nn.Linear(input_dim, 3 * embed_dim)
         self.o_proj = nn.Linear(embed_dim, embed_dim)
 
-    def forward(self, x, mask=None):
+    def forward(self, x, mask: Optional [torch.Tensor]=None):
         batch_size, seq_length, embed_dim = x.size()
         qkv = self.qkv_proj(x)
 
@@ -80,7 +82,7 @@ class EncoderBlock(nn.Module):
         self.norm2 = nn.LayerNorm(input_dim)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x, mask=None):
+    def forward(self, x, mask: Optional [torch.Tensor]=None):
         # Attention part
         attn_out, _ = self.attn(x, mask=mask)
         x = x + self.dropout(attn_out)
@@ -94,10 +96,10 @@ class EncoderBlock(nn.Module):
         return x
 
 class TransformerEncoder(nn.Module):
-    def __init__(self, num_layers, **block_args):
+    def __init__(self, num_layers, input_dim, num_heads, dim_feedforward, dropout=0.0):
         super().__init__()
-        self.layers = nn.ModuleList([EncoderBlock(**block_args) for _ in range(num_layers)])
-    def forward(self, x, mask=None):
+        self.layers = nn.ModuleList([EncoderBlock(input_dim, num_heads, dim_feedforward, dropout) for _ in range(num_layers)])
+    def forward(self, x, mask: Optional [torch.Tensor]=None):
         for layer in self.layers:
             x = layer(x, mask=mask)
         return x
@@ -152,7 +154,7 @@ class SingleChannelTransformer(nn.Module):
             nn.Sigmoid()
         )
     
-    def forward(self, x, mask=None, add_positional_encoding=True):
+    def forward(self, x, mask: Optional [torch.Tensor]=None, add_positional_encoding: bool=True):
         """
         Args:
             x: Input features of shape [Batch, SeqLen, input_dim]
@@ -160,11 +162,10 @@ class SingleChannelTransformer(nn.Module):
             add_positional_encoding: If True, we add the positional encoding to the input.
                                       Might not be desired for some tasks.
         """
-
         x = self.input_net(x)
         if add_positional_encoding:
             x = self.positional_encoding(x)
-        x = self.transformer(x, mask=mask)          # [Batch, SeqLen, ModDim]
-        x = self.pooling_net(x, mask=mask)            # GlobalAveragePooling
+        x = self.transformer(x, mask=mask)              # [Batch, SeqLen, ModDim]
+        x = self.pooling_net(x, mask=mask)              # GlobalAveragePooling
         x = self.output_net(x)
         return x

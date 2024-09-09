@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 import torch
 from torch import optim
@@ -9,7 +10,7 @@ class AttentionPooling(nn.Module):
         super().__init__()
         self.W = nn.Linear(input_dim, hidden_dim)
         self.U = nn.Linear(hidden_dim, 1)
-    def forward(self, x, mask=None):
+    def forward(self, x, mask: Optional[torch.Tensor]=None):
         # x: [BatchSize, SeqLen, InputDim] -> [SeqLen, BatchSize, InputDim]
         x = x.permute(1, 0, 2)
         scores = self.U(torch.tanh(self.W(x)))
@@ -21,11 +22,13 @@ class MaskedMeanPooling(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, x, mask=None):
+    def forward(self, x, mask: Optional[torch.Tensor]=None):
         '''
             x:      [BatchSize, SeqLen, Dim]
             mask:   [BatchSize, SeqLen]
         '''
+        if mask is None:
+            return x.mean(dim=1)
         return (x * mask.unsqueeze(-1)).sum(dim=1) / mask.sum(dim=1).unsqueeze(1)
 
 class CosineWarmupScheduler(optim.lr_scheduler._LRScheduler):

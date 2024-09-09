@@ -24,6 +24,7 @@ parser.add_argument('--cls_dataset', default='SingleChannelDataset', type=str)
 parser.add_argument('--dataset', type=str)
 parser.add_argument('--max_epoches', default=30, type=int)
 parser.add_argument('--batch_size', default=8, type=int)
+parser.add_argument("--output", "-o", type=str)
 args = parser.parse_args()
 
 ### load pretrain model
@@ -72,5 +73,8 @@ trainer.logger._default_hp_metric = None
 
 ### start to train
 trainer.fit(predictor, train_loader, valid_loader)
+
+os.makedirs(os.path.dirname(args.output), exist_ok=True)
+torch.jit.save(predictor.to_torchscript(file_path=args.output, method="script"))
 
 logger.info("[+] train.py execute finished!")
