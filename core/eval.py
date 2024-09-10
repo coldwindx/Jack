@@ -36,42 +36,11 @@ dataloader = DataLoader(dataset, batch_size=args.batch_size, collate_fn=collate_
 ### load model
 if args.cls_model == "SingleChannelPredictor":
     from core.predictor import SingleChannelPredictor
-    from core.predictor import SingleChannelPredictor
-    ckpt = torch.load(args.model)
-    ckpt['state_dict']['net.input_net.0.weight'] = ckpt['state_dict'].pop('input_net.0.weight')
-    ckpt['state_dict']['net.input_net.2.weight'] = ckpt['state_dict'].pop('input_net.2.weight')
-    ckpt['state_dict']['net.input_net.2.bias'] = ckpt['state_dict'].pop('input_net.2.bias')
-    ckpt['state_dict']['net.transformer.layers.0.attn.qkv_proj.weight'] = ckpt['state_dict'].pop('transformer.layers.0.self_attn.qkv_proj.weight')
-    ckpt['state_dict']['net.transformer.layers.0.attn.qkv_proj.bias'] = ckpt['state_dict'].pop('transformer.layers.0.self_attn.qkv_proj.bias')
-    ckpt['state_dict']['net.transformer.layers.0.attn.o_proj.weight'] = ckpt['state_dict'].pop('transformer.layers.0.self_attn.o_proj.weight')
-    ckpt['state_dict']['net.transformer.layers.0.attn.o_proj.bias'] = ckpt['state_dict'].pop('transformer.layers.0.self_attn.o_proj.bias')
-    ckpt['state_dict']['net.transformer.layers.0.linear_net.0.weight'] = ckpt['state_dict'].pop('transformer.layers.0.linear_net.0.weight')
-    ckpt['state_dict']['net.transformer.layers.0.linear_net.0.bias'] = ckpt['state_dict'].pop('transformer.layers.0.linear_net.0.bias')
-    ckpt['state_dict']['net.transformer.layers.0.linear_net.3.weight'] = ckpt['state_dict'].pop('transformer.layers.0.linear_net.3.weight')
-    ckpt['state_dict']['net.transformer.layers.0.linear_net.3.bias'] = ckpt['state_dict'].pop('transformer.layers.0.linear_net.3.bias')
-    ckpt['state_dict']['net.transformer.layers.0.norm1.weight'] = ckpt['state_dict'].pop('transformer.layers.0.norm1.weight')
-    ckpt['state_dict']['net.transformer.layers.0.norm1.bias'] = ckpt['state_dict'].pop('transformer.layers.0.norm1.bias')
-    ckpt['state_dict']['net.transformer.layers.0.norm2.weight'] = ckpt['state_dict'].pop('transformer.layers.0.norm2.weight')
-    ckpt['state_dict']['net.transformer.layers.0.norm2.bias'] = ckpt['state_dict'].pop('transformer.layers.0.norm2.bias')
-    ckpt['state_dict']['net.output_net.0.weight'] = ckpt['state_dict'].pop('output_net.0.weight')
-    ckpt['state_dict']['net.output_net.0.bias'] = ckpt['state_dict'].pop('output_net.0.bias')
-    ckpt['state_dict']['net.output_net.2.weight'] = ckpt['state_dict'].pop('output_net.2.weight')
-    ckpt['state_dict']['net.output_net.2.bias'] = ckpt['state_dict'].pop('output_net.2.bias')
-    predictor = SingleChannelPredictor(
-        vocab_size = 30522,
-        input_dim=64,
-        model_dim=64,
-        num_heads=8,
-        num_classes=1,
-        num_layers=1,
-        dropout=0.1,
-        input_dropout=0.1,
-        lr=1e-4,
-        warmup=8,
-        max_iters=30 * 4,
-        weight_decay=1e-6
-    )
-    predictor.load_state_dict(ckpt['state_dict'])
+    tokenizer = BertTokenizer.from_pretrained(args["pretrain"], use_fast=True)
+
+    ckpt = torch.load(args["model"])
+    predictor = SingleChannelPredictor(**ckpt["hyper_parameters"])
+    predictor.load_state_dict(ckpt["state_dict"])
 
 ### start to eval
 predictor = predictor.cuda().eval()

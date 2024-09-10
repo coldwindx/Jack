@@ -39,11 +39,11 @@ class MultipleChannelDataset(Dataset):
 
     def __len__(self):
         return len(self.labels)
-    
-    def collate(self, tokenizer):
+    @staticmethod
+    def collate(tokenizer):
         def collate_fn(batch):
             df = pd.DataFrame(batch, columns=["pseqs", "fseqs", "rseqs", "aseqs", "label"])
-            padded_sent_pseq = tokenizer(df["pseq"].to_list(), padding=True, truncation=True, max_length=2048, return_tensors="pt")
+            padded_sent_pseq = tokenizer(df["pseqs"].to_list(), padding=True, truncation=True, max_length=2048, return_tensors="pt")
             padded_sent_fseq = tokenizer(df["fseqs"].to_list(), padding=True, truncation=True, max_length=2048, return_tensors="pt")
             padded_sent_rseq = tokenizer(df["rseqs"].to_list(), padding=True, truncation=True, max_length=2048, return_tensors="pt")
             padded_sent_aseq = tokenizer(df["aseqs"].to_list(), padding=True, truncation=True, max_length=2048, return_tensors="pt")
@@ -53,6 +53,5 @@ class MultipleChannelDataset(Dataset):
             o_seq_length = [[sum(m0), sum(m1), sum(m2), sum(m3)] for m0, m1, m2, m3 in o_attention_mask]
             return o_input_ids, o_attention_mask, o_seq_length, torch.tensor(df["label"])
         return collate_fn
-    
     def __getitem__(self, idx):
         return self.pseqs[idx], self.fseqs[idx], self.rseqs[idx], self.aseqs[idx], self.labels[idx]

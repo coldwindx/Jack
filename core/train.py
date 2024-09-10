@@ -35,7 +35,11 @@ if args.cls_dataset == "SingleChannelDataset":
     from core.dataset import SingleChannelDataset
     dataset = SingleChannelDataset(args.dataset)
     collate_fn = SingleChannelDataset.collate(tokenizer)
-
+if args.cls_dataset == "MultipleChannelDataset":
+    from core.dataset import MultipleChannelDataset
+    dataset = MultipleChannelDataset(args.dataset)
+    collate_fn = MultipleChannelDataset.collate(tokenizer)
+    
 ### split dataset
 train_size = len(dataset) - 1024 * 64 * 2
 train_dataset, valid_dataset, _ = random_split(dataset, [train_size, 1024 * 64, 1024 * 64])
