@@ -169,3 +169,52 @@ class SingleChannelTransformer(nn.Module):
         x = self.pooling_net(x, mask=mask)              # GlobalAveragePooling
         x = self.output_net(x)
         return x
+
+
+class MultipleChannelTransformer(nn.Module):
+    def __init__(self, vocab_size, input_dim, model_dim, num_classes, num_heads, num_layers, dropout=0.0, input_dropout=0.0):
+        super().__init__()
+        # Input dim -> Model dim
+        self.input_net = nn.Sequential(
+            nn.Embedding(vocab_size, input_dim),
+            nn.Dropout(input_dropout), 
+            nn.Linear(input_dim, model_dim)
+        )
+
+        # Positional encoding for sequences
+        self.positional_encoding = PositionalEncoding(d_model=model_dim)
+        # Transformer
+        self.transformer = TransformerEncoder(
+            num_layers=num_layers,
+            input_dim = model_dim,
+            dim_feedforward=2 * model_dim,
+            num_heads=num_heads,
+            dropout=dropout
+        )
+        # Output classifier per sequence lement
+        self.pooling_net = MaskedMeanPooling()
+        # self.pooling_net = AttentionPooling(model_dim, model_dim)
+        self.output_net = nn.Sequential(
+            nn.Linear(model_dim, model_dim // 2),
+            # nn.LayerNorm(model_dim),
+            nn.ReLU(inplace=True),
+            # nn.Dropout(dropout),
+            nn.Linear(model_dim // 2, num_classes),
+            nn.Sigmoid()
+        )
+    
+    def forward(self, x, mask: Optional [torch.Tensor]=None, add_positional_encoding: bool=True):
+        """
+        Args:
+            x: Input features of shape [Batch, SeqLen, input_dim]
+            mask: Mask to apply on the attention outputs (optional)
+            add_positional_encoding: If True, we add the positional encoding to the input.
+                                      Might not be desired for some tasks.
+        """
+        x = self.input_net(x)
+        if add_positional_encoding:
+            x = self.positional_encoding(x)
+        x = self.transformer(x, mask=mask)              # [Batch, SeqLen, ModDim]
+        x = self.pooling_net(x, mask=mask)              # GlobalAveragePooling
+        x = self.output_net(x)
+        return x
