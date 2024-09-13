@@ -72,10 +72,10 @@ class SingleChannelPredictor(pl.LightningModule):
 
 
 class SingleChannelClassifier(pl.LightningModule):
-    def __init__(self, vocab_size, input_dim, model_dim, num_classes, num_heads, num_layers, lr, warmup, max_iters, dropout=0.0, input_dropout=0.0, weight_decay=0.0):
+    def __init__(self, transformer, lr, warmup, max_iters, weight_decay=0.0):
         super().__init__()
         self.save_hyperparameters()
-        self.net = SingleChannelTransformer(vocab_size, input_dim, model_dim, num_classes, num_heads, num_layers, dropout, input_dropout)
+        self.transformer = transformer
 
     def forward(self, x, mask=None, add_positional_encoding=True):
          return self.net(x, mask=mask, add_positional_encoding=add_positional_encoding)
