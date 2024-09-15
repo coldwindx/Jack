@@ -16,4 +16,7 @@ __pycache__
 *.log
 *.pk
 *.pt
+*.ph
+*.npy
 .vscode
+lightning_logs

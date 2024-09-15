@@ -1,6 +1,7 @@
 import os
 import sys
 import datatable as dt
+import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
@@ -55,3 +56,40 @@ class MultipleChannelDataset(Dataset):
         return collate_fn
     def __getitem__(self, idx):
         return self.pseqs[idx], self.fseqs[idx], self.rseqs[idx], self.aseqs[idx], self.labels[idx]
+
+
+class DeepRanDataset(Dataset):
+    def __init__(self, path):
+        data = dt.fread(path, fill=True)
+        self.seqs = data[:,dt.f.channel].to_numpy().flatten()
+        self.labels = data[:,dt.f.label].to_numpy(type=dt.float32).flatten()
+    def __len__(self):
+        return len(self.labels)
+    
+    def __getitem__(self, idx):
+        return self.seqs[idx], self.labels[idx]
+
+    @staticmethod
+    def collate(tv, fasttext, default_idf):
+        def collate_fn(batch):
+            tokenizer  = tv.build_tokenizer()
+
+            df = pd.DataFrame(batch, columns=["seq", "label"])
+            df["tokens"] = df["seq"].apply(lambda seq: tokenizer(seq.lower()))
+            df["length"] = df["tokens"].apply(lambda tokens: len(tokens))
+
+            maxlen = min(df["length"].max(), 2048)
+
+            tfidfs, vecs = [], []
+            for token in df["tokens"].to_list():
+                tfidf = torch.zeros(size=(maxlen,), dtype=torch.float32)
+                vec = torch.zeros(size=(maxlen, 64), dtype=torch.float32)
+                for i, t in enumerate(token[:maxlen]):
+                    tfidf[i] = tv.idf_[tv.vocabulary_.get(t, default_idf)]
+                    vec[i] = torch.from_numpy(fasttext.wv.get_vector(t, True))
+                tfidfs.append(tfidf)
+                vecs.append(vec)
+            return torch.stack(tfidfs), torch.stack(vecs), \
+                    torch.from_numpy(df["length"].to_numpy()), \
+                    torch.from_numpy(df["label"].to_numpy())
+        return collate_fn
