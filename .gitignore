@@ -19,3 +19,4 @@ __pycache__
 *.ph
 *.npy
 .vscode
+lightning_logs

@@ -2,6 +2,7 @@ import argparse
 import os
 import re
 import sys
+import numpy as np
 import psutil
 import pickle
 from loguru import logger
