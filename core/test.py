@@ -36,6 +36,24 @@ fasttext = FastText.load(args.fasttext)
 dataset = DeepRanDataset(args.dataset)
 loader = DataLoader(dataset, batch_size=args.batch_size, collate_fn=DeepRanDataset.collate(tv, fasttext, np.min(tv.idf_)))
 
+import datatable as dt
+data = dt.fread("/home/zhulin/datasets/cdatasets.train.5.csv", fill=True, skip_to_line=201920, max_nrows=1024)
+
+tokenizer  = tv.build_tokenizer()
+df = data.to_pandas()
+df["tokens"] = df["channel"].apply(lambda seq: tokenizer(seq.lower()))
+df["length"] = df["tokens"].apply(lambda tokens: len(tokens))
+maxlen = min(df["length"].max(), 2048)
+
+            tfidfs, vecs = [], []
+            for token in df["tokens"].to_list():
+                tfidf = torch.zeros(size=(maxlen,), dtype=torch.float32)
+                vec = torch.zeros(size=(maxlen, 64), dtype=torch.float32)
+                for i, t in enumerate(token[:maxlen]):
+                    tfidf[i] = tv.idf_[tv.vocabulary_.get(t, default_idf)]
+                    vec[i] = torch.from_numpy(fasttext.wv.get_vector(t, True))
+                tfidfs.append(tfidf)
+                vecs.append(vec)
 
 for batch in loader:
     import pdb
