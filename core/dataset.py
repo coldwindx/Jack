@@ -76,7 +76,7 @@ class DeepRanDataset(Dataset):
 
             df = pd.DataFrame(batch, columns=["seq", "label"])
             df["tokens"] = df["seq"].apply(lambda seq: tokenizer(seq.lower()))
-            df["length"] = df["tokens"].apply(lambda tokens: len(tokens))
+            df["length"] = df["tokens"].apply(lambda tokens: min(2048, len(tokens)))
 
             maxlen = min(df["length"].max(), 2048)
 
