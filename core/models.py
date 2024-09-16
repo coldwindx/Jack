@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
+@torch.jit.export
 def prepare_pack_padded_sequence(inputs_words, seq_lengths, descending=True):
     """
     for rnn model
-    :param device:
-    :param inputs_words:
+    :param inputs_words: [Batch, SeqLen, input_dim]
     :param seq_lengths:
     :param descending:
     :return:
@@ -34,7 +34,7 @@ class DeepRan(nn.Module):
         self.w = nn.Parameter(torch.randn(num_layers * 2, model_dim), requires_grad=True)
         self.fc = nn.Sequential(
             nn.Dropout(dropout, inplace=True),
-            nn.Linear(num_layers * 2, num_classes),
+            nn.Linear(model_dim, num_classes),
             nn.Sigmoid()
         )
 
@@ -51,7 +51,6 @@ class DeepRan(nn.Module):
         sorted_seq_lengths = sorted_seq_lengths.cpu()
         packed_embedded = pack_padded_sequence(embed, sorted_seq_lengths, batch_first=True)
         _, (hidden, _) = self.lstm(packed_embedded)
-
-        alpha = torch.sum(torch.mul(self.w, hidden.permute(1, 0, 2)), dim=2)
+        alpha = torch.sum(torch.mul(self.w, hidden.permute(1, 0, 2)), dim=1)
         logits = self.fc(alpha)
         return logits
