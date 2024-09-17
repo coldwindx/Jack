@@ -13,7 +13,8 @@
 python core/train.py --cls_model DeepRanPredictor \
                     --cls_dataset DeepRanDataset \
                     --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.train.5.csv \
-                    --batch_size 1024 \
+                    --batch_size 8 \
+                    --max_epochs 2 \
                     --output /home/zhulin/models/deep_ran.pt
 
 # python core/data.py --task add_family \

@@ -51,6 +51,7 @@ class DeepRan(nn.Module):
         sorted_seq_lengths = sorted_seq_lengths.cpu()
         packed_embedded = pack_padded_sequence(embed, sorted_seq_lengths, batch_first=True)
         _, (hidden, _) = self.lstm(packed_embedded)
+
         alpha = torch.sum(torch.mul(self.w, hidden.permute(1, 0, 2)), dim=1)
         logits = self.fc(alpha)
         return logits
