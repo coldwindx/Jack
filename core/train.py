@@ -45,14 +45,17 @@ if args.cls_dataset == "MultipleChannelDataset":
     dataset = MultipleChannelDataset(args.dataset)
     collate_fn = MultipleChannelDataset.collate(tokenizer)
 if args.cls_dataset == "DeepRanDataset":
+    import joblib
     from core.dataset import DeepRanDataset
     from gensim.models import FastText
     dataset = DeepRanDataset(args.dataset)
     tv = pickle.load(open(args.tfidf, "rb"))
     fasttext = FastText.load(args.fasttext)
-    collate_fn = DeepRanDataset.collate(tv, fasttext, np.min(tv.idf_))
+    collate_fn = DeepRanDataset.collate(tv, fasttext, np.argmin(tv.idf_))
 
 ### split dataset
+# train_size = len(dataset) - 8 * 32 * 2
+# train_dataset, valid_dataset, _ = random_split(dataset, [train_size, 8 * 32, 8 * 32])
 train_size = len(dataset) - 1024 * 64 * 2
 train_dataset, valid_dataset, _ = random_split(dataset, [train_size, 1024 * 64, 1024 * 64])
 sampler = ImbalancedDatasetSampler(train_dataset)
@@ -96,7 +99,8 @@ trainer = pl.Trainer(
     # accelerator="gpu", devices=1, num_nodes=1, strategy="ddp",
     accelerator="auto",
     max_epochs=args.max_epochs,
-    accumulate_grad_batches=8
+    accumulate_grad_batches=8,
+    profiler="simple"
 )
 trainer.logger._default_hp_metric = None
 
