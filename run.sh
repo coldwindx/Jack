@@ -1,8 +1,16 @@
-# eval
-# python core/test.py --cls_model SingleChannelPredictor \
+# 【eval】
+# python core/eval.py --cls_model SingleChannelPredictor \
 #                     --cls_dataset SingleChannelDataset \
 #                     --model /home/zhulin/models/single_channel_transformer.ckpt \
-#                     --dataset /home/zhulin/datasets/cdatasets.test.5.csv
+#                     --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.test.5.csv
+
+python core/eval.py --cls_model DeepRanPredictor \
+                    --cls_dataset DeepRanDataset \
+                    --model /mnt/sdd1/data/zhulin/jack/models/DeepRan-14.ckpt \
+                    --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.test.5.csv \
+                    --batch_size 64 \
+                    --output /mnt/sdd1/data/zhulin/jack/scores/DeepRanPredictor.npy
+
 
 # 【Train】
 # python core/test.py --cls_model SingleChannelPredictor \
@@ -10,12 +18,12 @@
 #                     --dataset /mnt/sdd1/data/zhulin/jack/mcdatasets.train.csv \
 #                     --output /home/zhulin/models/single_channel_transformer.pt
 
-python core/train.py --cls_model DeepRanPredictor \
-                    --cls_dataset DeepRanDataset \
-                    --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.train.5.csv \
-                    --batch_size 8 \
-                    --max_epochs 2 \
-                    --output /home/zhulin/models/deep_ran.pt
+# python core/train.py --cls_model DeepRanPredictor \
+#                     --cls_dataset DeepRanDataset \
+#                     --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.train.5.csv \
+#                     --batch_size 8 \
+#                     --max_epochs 2 \
+#                     --output /home/zhulin/models/deep_ran.pt
 
 # python core/data.py --task add_family \
 #                     --json /home/zhulin/workspace/Sun-agent/build/cdatasets.eval.json \

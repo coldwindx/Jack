@@ -57,7 +57,6 @@ class MultipleChannelDataset(Dataset):
     def __getitem__(self, idx):
         return self.pseqs[idx], self.fseqs[idx], self.rseqs[idx], self.aseqs[idx], self.labels[idx]
 
-import joblib
 class DeepRanDataset(Dataset):
     def __init__(self, path):
         # data = dt.fread(path, fill=True, max_nrows=8 * 32 * 3)
@@ -85,6 +84,7 @@ class DeepRanDataset(Dataset):
             for token in df["tokens"].to_list():
                 tfidf = torch.zeros(size=(maxlen,), dtype=torch.float32)
                 vec = torch.zeros(size=(maxlen, 64), dtype=torch.float32)
+
                 for i, t in enumerate(token[:maxlen]):
                     tfidf[i] = tv.idf_[tv.vocabulary_.get(t, default_idf)]
                     vec[i] = torch.from_numpy(fasttext.wv.get_vector(t, True))

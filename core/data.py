@@ -40,11 +40,21 @@ def add_family(csv):
         df: pd.DataFrame = dt.fread(file, fill=True).to_pandas()
         df["family"] = pd.merge(df, df_family, on="index")["family"]
         df.to_csv(file, index=False)
-    
+
+def add_total(csv):
+    cnt = []
+    with open("/home/zhulin/workspace/Sun-agent/build/total.eval.json", "r") as f:
+        for line in f.readlines():
+            cnt.append(json.loads(line)["cnt_event"])
+    df: pd.DataFrame = dt.fread(csv, fill=True).to_pandas()
+    df["cnt"] = cnt
+    df.to_csv(csv, index=False)
+
 if __name__ == "__main__":
     if args.task == "json_to_csv":
         json_to_csv(args.json, args.csv)
     if args.task == "add_family":
         add_family(args.csv)
-
+    if args.task == "add_total":
+        add_total(args.csv)
 logger.info(f"[+] Finished! {os.getpid()} {cmdline}")

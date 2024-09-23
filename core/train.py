@@ -51,7 +51,7 @@ if args.cls_dataset == "DeepRanDataset":
     dataset = DeepRanDataset(args.dataset)
     tv = pickle.load(open(args.tfidf, "rb"))
     fasttext = FastText.load(args.fasttext)
-    collate_fn = DeepRanDataset.collate(tv, fasttext, np.min(tv.idf_))
+    collate_fn = DeepRanDataset.collate(tv, fasttext, np.argmin(tv.idf_))
 
 ### split dataset
 # train_size = len(dataset) - 8 * 32 * 2
