@@ -8,7 +8,7 @@ python core/eval.py --cls_model DeepRanPredictor \
                     --cls_dataset DeepRanDataset \
                     --model /mnt/sdd1/data/zhulin/jack/models/DeepRan-14.ckpt \
                     --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.test.5.csv \
-                    --batch_size 64 \
+                    --batch_size 1024 \
                     --output /mnt/sdd1/data/zhulin/jack/scores/DeepRanPredictor.npy
 
 

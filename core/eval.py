@@ -43,7 +43,7 @@ if args.cls_dataset == "DeepRanDataset":
     collate_fn = DeepRanDataset.collate(tv, fasttext, np.argmin(tv.idf_))
 
 # dataloader = DataLoader(dataset, batch_size=args.batch_size, collate_fn=collate_fn)
-dataloader = DataLoader(dataset, batch_size=args.batch_size, collate_fn=collate_fn, num_workers=4)
+dataloader = DataLoader(dataset, batch_size=args.batch_size, collate_fn=collate_fn, num_workers=8)
 
 ### load model
 if args.cls_model == "SingleChannelPredictor":
