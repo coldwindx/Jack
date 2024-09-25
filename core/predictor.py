@@ -184,3 +184,57 @@ class DeepRanPredictor(pl.LightningModule):
         preds = self.forward(tfidfs, vecs, lengths=lengths)
         preds = preds.reshape(labels.shape)
         return preds
+
+from torch import nn
+from .models import AutoEncoder
+class DeepGuard(pl.LightningModule):
+    def __init__(self, input_dim, model_dim, output_dim, lr, warmup, max_iters, dropout=0.0, weight_decay=0.0):
+        super().__init__()
+        self.save_hyperparameters()
+        self.batchlayer = nn.BatchNorm1d(num_features=input_dim)
+        self.autoencoder = AutoEncoder(self.hparams.input_dim, self.hparams.model_dim, self.hparams.output_dim, self.hparams.dropout)
+    def forward(self, x):
+        x = self.batchlayer(x)
+        z, h = self.autoencoder(x)
+        return x, h
+    
+    def configure_optimizers(self):
+        optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay)
+        return optimizer
+    
+    def optimizer_step(self, *args, **kwargs):
+        super().optimizer_step(*args, **kwargs)
+    
+    def training_step(self, batch, batch_idx):
+        raise NotImplementedError
+    def validation_step(self, batch, batch_idx):
+        raise NotImplementedError
+    def test_step(self, batch, batch_idx):
+        raise NotImplementedError
+
+
+class DeepGuardPredictor(DeepGuard):
+    def _calculate_loss(self, batch, mode="train"):
+        x, _ = batch
+        x, h = self.forward(x)
+        # loss = F.cross_entropy(x, h)
+        loss = F.mse_loss(x, h)
+        self.log("%s_loss" % mode, loss, on_epoch=True, enable_graph=True)
+        return loss
+
+    def training_step(self, batch, batch_idx):
+        loss = self._calculate_loss(batch, mode="train")
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        loss = self._calculate_loss(batch, mode="val")
+        return loss
+    def test_step(self, batch, batch_idx):
+        loss = self._calculate_loss(batch, mode="test")
+        return loss
+    def predict_step(self, batch, batch_idx):
+        x, _ = batch
+        x, h = self.forward(x)
+        # loss = F.cross_entropy(x, h)
+        loss = F.mse_loss(x, h, reduce=False).mean(dim=1)
+        return loss

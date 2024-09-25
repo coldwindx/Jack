@@ -55,3 +55,32 @@ class DeepRan(nn.Module):
         alpha = torch.sum(torch.mul(self.w, hidden.permute(1, 0, 2)), dim=1)
         logits = self.fc(alpha)
         return logits
+
+
+class AutoEncoder(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim, dropout=0.4):
+        super(AutoEncoder, self).__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, output_dim),
+            nn.Dropout(dropout)
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(output_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, input_dim),
+            nn.ReLU()
+        )
+    def forward(self, x):
+        z = self.encoder(x)
+        h = self.decoder(z)
+        return z, h
