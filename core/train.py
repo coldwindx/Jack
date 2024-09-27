@@ -54,8 +54,6 @@ if args.cls_dataset == "DeepRanDataset":
     collate_fn = DeepRanDataset.collate(tv, fasttext, np.argmin(tv.idf_))
 
 ### split dataset
-# train_size = len(dataset) - 8 * 32 * 2
-# train_dataset, valid_dataset, _ = random_split(dataset, [train_size, 8 * 32, 8 * 32])
 train_size = len(dataset) - 1024 * 64 * 2
 train_dataset, valid_dataset, _ = random_split(dataset, [train_size, 1024 * 64, 1024 * 64])
 sampler = ImbalancedDatasetSampler(train_dataset)
