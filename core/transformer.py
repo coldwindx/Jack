@@ -9,7 +9,7 @@ import torch.nn.functional as F
 sys.path.append(os.getcwd())  
 
 from .network import MaskedMeanPooling
-
+F.scaled_dot_product_attention
 @torch.jit.export
 def scaled_dot_product(q, k, v, mask: Optional [torch.Tensor]=None):
     '''

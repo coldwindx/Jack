@@ -4,12 +4,22 @@
 #                     --model /home/zhulin/models/single_channel_transformer.ckpt \
 #                     --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.test.5.csv
 
-python core/eval.py --cls_model DeepRanPredictor \
-                    --cls_dataset DeepRanDataset \
-                    --model /mnt/sdd1/data/zhulin/jack/models/DeepRan-14.ckpt \
+# python core/eval.py --cls_model DeepRanPredictor \
+#                     --cls_dataset DeepRanDataset \
+#                     --model /mnt/sdd1/data/zhulin/jack/models/DeepRan-14.ckpt \
+#                     --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.test.5.csv \
+#                     --batch_size 1024 \
+#                     --output /mnt/sdd1/data/zhulin/jack/scores/DeepRanPredictor.npy
+
+python core/eval.py --pretrain /mnt/sdd1/data/zhulin/pretrain/bert_pretrain_uncased/ \
+                    --cls_model SingleChannelPredictor \
+                    --cls_dataset SingleChannelDataset \
+                    --model /mnt/sdd1/data/zhulin/jack/models/epoch=29-step=2999010.ckpt \
                     --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.test.5.csv \
-                    --batch_size 1024 \
-                    --output /mnt/sdd1/data/zhulin/jack/scores/DeepRanPredictor.npy
+                    --batch_size 8 \
+                    --output /mnt/sdd1/data/zhulin/jack/scores/Transformer.npy
+
+
 
 
 # 【Train】
@@ -35,6 +45,8 @@ python core/eval.py --cls_model DeepRanPredictor \
 # python core/data.py --json /home/zhulin/workspace/Sun-agent/build/cdatasets.train.zl.json,/home/zhulin/datasets/cdatasets.train.5.json \
 #                     --csv /mnt/sdd1/data/zhulin/jack/cdatasets.train.csv
 
+# python core/data.py --task model_2_model --model /mnt/sdd1/data/zhulin/jack/models/Transformer.ckpt
+# python core/data.py --task model_2_model --model /mnt/sdd1/data/zhulin/jack/models/epoch=29-step=2999010.ckpt
 # [Train Fasttext]
 # python core/pretrain.py --task TfidfVectorizer --dataset /home/zhulin/datasets/cdatasets.train.5.csv --output tfidf.ph
 # python core/test.py --fasttext ./common/fasttext.ph \
