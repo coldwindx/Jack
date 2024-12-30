@@ -112,7 +112,6 @@ def model_2_model(model):
     torch.save(ckpt, model)
 
 
-
 if __name__ == "__main__":
     if args.task == "json_to_csv":
         json_to_csv(args.json, args.csv)

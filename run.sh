@@ -1,8 +1,8 @@
 # 【eval】
-# python core/eval.py --cls_model SingleChannelPredictor \
-#                     --cls_dataset SingleChannelDataset \
-#                     --model /home/zhulin/models/single_channel_transformer.ckpt \
-#                     --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.test.5.csv
+python core/eval.py --cls_model SingleChannelPredictor \
+                    --cls_dataset SingleChannelDataset \
+                    --model /home/zhulin/models/single_channel_transformer.ckpt \
+                    --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.test.5.csv
 
 # python core/eval.py --cls_model DeepRanPredictor \
 #                     --cls_dataset DeepRanDataset \
@@ -18,9 +18,6 @@ python core/eval.py --pretrain /mnt/sdd1/data/zhulin/pretrain/bert_pretrain_unca
                     --dataset /mnt/sdd1/data/zhulin/jack/cdatasets.test.5.csv \
                     --batch_size 8 \
                     --output /mnt/sdd1/data/zhulin/jack/scores/Transformer.npy
-
-
-
 
 # 【Train】
 # python core/test.py --cls_model SingleChannelPredictor \

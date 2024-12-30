@@ -95,3 +95,10 @@ class DeepRanDataset(Dataset):
                     torch.from_numpy(df["length"].to_numpy()), \
                     torch.from_numpy(df["label"].to_numpy())
         return collate_fn
+    
+if __name__ == "__main__":
+    path = "/mnt/sdd1/data/zhulin/jack/cdatasets.test.6.csv"
+    data = dt.fread(path, fill=True)
+    pcnt = data[dt.f.label==0, dt.count()]
+    ncnt = data[dt.f.label==1, dt.count()]
+    print(pcnt, ncnt)
